@@ -1,0 +1,5 @@
+name: PlayerDieEvent
+author: Franco28
+version: 1.0
+main: me.franco28.playereventdie.die
+description: Parte del codigo regulador del server
