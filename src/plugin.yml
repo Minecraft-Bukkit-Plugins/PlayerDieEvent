@@ -1,5 +1,6 @@
 name: PlayerDieEvent
 author: Franco28
-version: 1.0
+version: 1.1
+api-version: 1.15
 main: me.franco28.playereventdie.die
-description: Parte del codigo regulador del server
+description: Parte del codigo regulador del server, regula los eventos de muertes.

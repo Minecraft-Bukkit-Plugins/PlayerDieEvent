@@ -1,5 +1,6 @@
 package me.franco28.playereventdie;
 
+import java.util.Arrays;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -13,7 +14,9 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 import org.bukkit.plugin.java.JavaPlugin;
 
 public class die extends JavaPlugin implements Listener {
@@ -40,8 +43,6 @@ public class die extends JavaPlugin implements Listener {
         Chest c = (Chest) loc.getBlock().getState();
         c.getBlockInventory().setContents((ItemStack[])drops);
         c.setLock(player.getName());        
-        player.sendMessage(ChatColor.RED + "Se coloco un cofre con tus objetos en: " + "X: " + x + " Y: " + y + " Z: " + z);
-        player.sendMessage(ChatColor.RED + "Apurate! Cualquier jugador puede robarte tus objetos!");
         
         int count = 0;
          
@@ -50,8 +51,16 @@ public class die extends JavaPlugin implements Listener {
         count++;
         }      
         event.getDrops().remove(count);
-        }
-    }
+        }        
+        
+ 	   if(player.isDead()) {
+ 		  player.getKiller();
+           if(player.getKiller() instanceof Player) {
+               player.sendMessage(ChatColor.RED + "Mataste a " + player.getName() + "!");
+			    Bukkit.broadcastMessage(ChatColor.RED + player.getName() + "Murió por " + player.getKiller() );
+           }
+       }
+	}
     
     public ItemStack[] toItemStack(List<ItemStack> list) {
     	ItemStack[] items = new ItemStack[list.size()];
@@ -62,20 +71,23 @@ public class die extends JavaPlugin implements Listener {
     	}
 		return items;		
     	}
-    
-    public void onPlayerKilled(PlayerDeathEvent event) {
-	    Player p = event.getEntity();
 
-	   if(p.isDead()) {
-            p.getKiller();
-            if(p.getKiller() instanceof Player) {
-                p.sendMessage(ChatColor.RED + "Mataste a " + p.getName() + "!");
-			    Bukkit.broadcastMessage(ChatColor.RED + p.getName() + "Murió por " + p.getKiller() );
-            }
-        }
+    @EventHandler(priority = EventPriority.HIGH)
+    public void onPlayerRespawn(PlayerRespawnEvent event) {
+        Player player = (Player) event.getPlayer();      
+        int x = player.getLocation().getBlockX();
+        int y = player.getLocation().getBlockY();
+        int z = player.getLocation().getBlockZ();
+        ItemStack book = new ItemStack(Material.WRITTEN_BOOK);
+        BookMeta bm = (BookMeta) book.getItemMeta();
+        bm.setPages(Arrays.asList(player.getName() + ". Has muerto, por lo cual tus ultimos objetos estan aqui: " + "X: " + x + " Y: " + y + " Z: " + z + ". Apresurate! ya que tu cofre puede ser robado :( "));
+      bm.setAuthor("Server by TatinSystem & sims03");
+      bm.setTitle("Coordenadas de tu ultima muerte!");
+      book.setItemMeta(bm);
+      player.getInventory().addItem(book);
     }
-           
-    @EventHandler(priority=EventPriority.LOW)
+               
+    @EventHandler(priority = EventPriority.HIGH)
     public void onPlayerDeath(PlayerDeathEvent event)
     {
         Player player = event.getEntity();
